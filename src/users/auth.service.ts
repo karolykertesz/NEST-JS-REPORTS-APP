@@ -18,7 +18,19 @@ export class AuthService {
     private userService: UsersService,
     @InjectRepository(User) private repo: Repository<User>,
   ) {}
-  signIn() {}
+  async signIn(email: string, password: string) {
+    const [user] = await this.userService.find(email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const [salt, storedHash] = user.password.split('.');
+    const hash = (await scrypt(password, salt, 32)) as Buffer;
+    if (storedHash === hash.toString('hex')) {
+      return user;
+    } else {
+      throw new BadRequestException('No user by this email or password!');
+    }
+  }
   async signup(email: string, password: string) {
     const userEx = await this.userService.find(email);
     if (userEx.length) {

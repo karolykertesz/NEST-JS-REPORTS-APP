@@ -1,4 +1,9 @@
-import { Injectable, NotAcceptableException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
@@ -11,6 +16,9 @@ export class UsersService {
     return this.repo.save(user);
   }
   findOne(id: number) {
+    if (!id) {
+      throw new NotFoundException('No user signed in');
+    }
     return this.repo.findOne(id);
   }
   find(email: string) {
